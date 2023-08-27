@@ -12,22 +12,32 @@ export type Table = {
     tableData: string[][];
 }
 
-const dbConfig = {
-    host: 'localhost',
-    port: 3306,
-    database: 'performance_schema',
-    user: 'root',
-    password: 'sample-password',
+type dbConfig = {
+    host: string;
+    port: number;
+    database: string;
+    user: string;
+    password: string;
 };
 
 export default class DB {
     private connection: mysql.Connection;
-    constructor() {
-        this.connection = mysql.createConnection(dbConfig);
+    private database = '';
+    constructor(host: string, port: number, database: string, user: string, password: string) {
+        const config:dbConfig = {
+            host: host,
+            port: port,
+            database: database,
+            user: user,
+            password: password,
+        };
+        this.connection = mysql.createConnection(config);
+        this.database = database;
     }
 
     public getLockData(): Promise<LockDatum[]> {
         return new Promise((resolve, reject) => {
+            this.connection.query('use performance_schema');
             this.connection.query(
                 'SELECT * FROM `data_locks`',
                 function(err, results) {
@@ -55,7 +65,7 @@ export default class DB {
     // @ts-ignore
     public getTable(tableName :string): Promise<Table>{
         return new Promise((resolve, reject) => {
-            this.connection.query('use sample');
+            this.connection.query('use ' + this.database);
                 this.connection.query(
                     'SELECT * FROM' +  '`' + tableName + '`',
                     function (err, results) {

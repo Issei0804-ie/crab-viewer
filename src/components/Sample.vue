@@ -26,6 +26,14 @@ type ColumnDefs = {
 
 export default defineComponent({
   name: "Sample",
+  props: {
+    host: {type: String, required: true},
+    port: {type: Number, required: true},
+    database: {type: String, required: true},
+    user: {type: String, required: true},
+    password: {type: String, required: true},
+    tableName: {type: String, required: true},
+  },
   components: {
     AgGridVue,
   },
@@ -66,13 +74,16 @@ export default defineComponent({
       this.rowData = rowData;
     },
     sampleMethod(){
-      const db = new DB();
+      const db = new DB(this.host, this.port, this.database, this.user, this.password);
       db.getLockData().then((data) => {
-        const sa = db.getTable(data[0]['objectName']);
+        const sa = db.getTable(this.tableName);
         sa.then((table) => {
           this.tableHeadToColumnDefs(table.tableHead);
           this.tableDataToRowData(table.tableData);
           data.forEach((row) => {
+            if (row['objectName'] !== this.tableName){
+              return;
+            }
             if (row['lockType'] === 'RECORD'){
               if (row['lockData'] !== ""){
                 if (!Number.isNaN(Number(row['lockData']))){
