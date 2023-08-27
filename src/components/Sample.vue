@@ -8,13 +8,23 @@
   </ag-grid-vue>
 </template>
 
-<script>
+<script lang="ts">
+import DB from "../infra/DB";
+import {defineComponent} from "vue";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { AgGridVue } from "ag-grid-vue3";
-import DB from "../infra/DB";
+import { AgGridVue } from "@ag-grid-community/vue3";
+import { ModuleRegistry } from '@ag-grid-community/core';
+import { ClientSideRowModelModule } from "@ag-grid-community/client-side-row-model";
 
-export default {
+ModuleRegistry.registerModules([ClientSideRowModelModule]);
+
+type ColumnDefs = {
+  headerName: string;
+  field: string;
+};
+
+export default defineComponent({
   name: "Sample",
   components: {
     AgGridVue,
@@ -24,32 +34,31 @@ export default {
       columnDefs: [
         { headerName: "Make", field: "make" },
         { headerName: "Model", field: "model" },
-        { headerName: "Price", field: "price" },
-      ],
+      ] as Array<ColumnDefs>,
       rowData: [
-        { make: "Toyota", model: "Celica", price: 35000 },
-        { make: "Ford", model: "Mondeo", price: 32000 },
-        { make: "Porsche", model: "Boxster", price: 72000 },
-      ],
+        { make: "Toyota", model: "Celica"},
+        { make: "Ford", model: "Mondeo"},
+        { make: "Porsche", model: "Boxster"},
+      ] as Array<any>,
     };
   },
   methods:{
-    tableHeadToColumnDefs(tableHead) {
-      const columnDefs = [];
+    tableHeadToColumnDefs(tableHead:string[]){
+      const columnDefs:ColumnDefs[] = [];
       for (const head of tableHead) {
         columnDefs.push({
           headerName: head,
           field: head,
-        });
+        } as ColumnDefs);
       }
       this.columnDefs = columnDefs;
     },
-    tableDataToRowData(tableData) {
-      const rowData = [];
+    tableDataToRowData(tableData:string[][]) {
+      const rowData:any[] = [];
       const columnDefs = this.columnDefs;
       tableData.forEach((row) => {
-        const rowDataItem = {};
-        columnDefs.forEach((columnDef, index) => {
+        const rowDataItem:any = {};
+        columnDefs.forEach((columnDef:ColumnDefs, index:number) => {
           rowDataItem[columnDef.field] = row[index];
         });
         rowData.push(rowDataItem);
@@ -65,10 +74,9 @@ export default {
           this.tableDataToRowData(table.tableData);
           data.forEach((row) => {
             if (row['lockType'] === 'RECORD'){
-              if (row['lockData'] !== null){
+              if (row['lockData'] !== ""){
                 if (!Number.isNaN(Number(row['lockData']))){
-                  this.rowData[row['lockData'] - 1]['id'] += '🔒' ;
-                  console.log(this.rowData[row['lockData'] - 1]['id']);
+                  this.rowData[Number(row['lockData']) - 1]['id'] += '🔒' ;
                 }
               }
             }
@@ -77,7 +85,7 @@ export default {
       });
     },
   },
-};
+});
 </script>
 
 <style scoped lang="scss">
