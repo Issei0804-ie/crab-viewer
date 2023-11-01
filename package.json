@@ -27,7 +27,7 @@
     "@types/mysql": "^2.15.21",
     "@types/pg": "^8.10.2",
     "@vitejs/plugin-vue": "^4.3.3",
-    "electron": "^26.0.0",
+    "electron": "^27.0.2",
     "electron-builder": "^24.6.3",
     "mysql": "^2.18.1",
     "mysql2": "^3.6.0",
